@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 
 # Adding customized cmake module
-list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+list(APPEND CMAKE_MODULE_PATH  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 project(ccl VERSION 0.2.1)
 
@@ -86,11 +86,14 @@ project(ccl VERSION 0.2.1)
     # The reason for building ccl as a shared library is that we can link it to
     # class directly, and it's not a dependency anymore
     add_library(ccl SHARED $<TARGET_OBJECTS:objlib>)
-    target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} ${ANGPOW_LIBRARIES} m)
+    target_link_libraries(ccl PRIVATE ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} ${ANGPOW_LIBRARIES} m)
+
+    # publish ccl include files for other CMake projetcs
+    target_include_directories(ccl INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
     # Builds the test suite
     add_executable(check_ccl ${TEST_SRC})
-    target_link_libraries(check_ccl ccl)
+    target_link_libraries(check_ccl PRIVATE ccl ${GSL_LIBRARIES} m)
 
     # Builds example folder in place, make this optional
     add_subdirectory(examples "${CMAKE_CURRENT_SOURCE_DIR}/examples" EXCLUDE_FROM_ALL)
