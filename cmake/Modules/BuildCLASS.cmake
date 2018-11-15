@@ -16,8 +16,7 @@ STRING(REPLACE "/" "\\/" CLASS_INSTALL_DIR "__CLASSDIR__='\"${CMAKE_INSTALL_PREF
 # Downloads and compiles CLASS
 ExternalProject_Add(CLASS
         PREFIX CLASS
-        GIT_REPOSITORY https://github.com/lesgourg/class_public.git
-        GIT_TAG ${CLASSTag}
+        URL https://github.com/lesgourg/class_public/archive/${CLASSTag}.tar.gz
         DOWNLOAD_NO_PROGRESS 1
         PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/cmake/class-2.6.3.patch
         # In the configuration step, we comment out the default compiler and

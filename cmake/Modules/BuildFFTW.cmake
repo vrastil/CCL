@@ -5,13 +5,13 @@ set(FFTWMD5 0d5915d7d39b3253c1cc05030d79ac47)
 
 find_package(FFTW)
 
-# If GSL is not installed, lets go ahead and compile it
+# If FFTW is not installed, lets go ahead and compile it
 if(NOT FFTW_FOUND )
     message(STATUS "FFTW not found, downloading and compiling from source")
     ExternalProject_Add(FFTW
         PREFIX FFTW
         URL http://www.fftw.org/fftw-${FFTWVersion}.tar.gz
-        URL_MD5 ${GSLMD5}
+        URL_MD5 ${FFTWMD5}
         DOWNLOAD_NO_PROGRESS 1
         CONFIGURE_COMMAND ./configure --prefix=${CMAKE_BINARY_DIR}/extern --enable-shared=no --with-pic=yes
         BUILD_COMMAND           make -j8
