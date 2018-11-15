@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.5)
 if (NOT CMAKE_BUILD_TYPE)
 		message(STATUS "No build type selected, default to Release")
 		set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
@@ -6,7 +6,7 @@ endif()
 MESSAGE( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 
 # Adding customized cmake module
-list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+list(APPEND CMAKE_MODULE_PATH  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 project(ccl VERSION 0.2.1)
 
@@ -32,10 +32,6 @@ project(ccl VERSION 0.2.1)
     # Defines list of extra distribution files and directories to be installed on the system
     set(EXTRA_DIST include/ccl_params.ini README.md LICENSE LICENSE_COSMICEMU)
     set(EXTRA_DIST_DIRS)
-
-    # Uses system libraries or downloads and build if necessary
-    include(BuildFFTW)
-    include(BuildGSL)
 
     # If a CLASS installation folder is provided, use it,
     # otherwise download and compile CLASS
@@ -92,25 +88,17 @@ project(ccl VERSION 0.2.1)
     # The reason for building ccl as a shared library is that we can link it to
     # class directly, and it's not a dependency anymore
     add_library(ccl SHARED $<TARGET_OBJECTS:objlib>)
-    target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} ${ANGPOW_LIBRARIES} m)
+    target_link_libraries(ccl PRIVATE ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} ${ANGPOW_LIBRARIES} m)
+
+    # publish ccl include files for other CMake projetcs
+    target_include_directories(ccl INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
     # Builds the test suite
     add_executable(check_ccl ${TEST_SRC})
-    target_link_libraries(check_ccl ccl)
+    target_link_libraries(check_ccl PRIVATE ccl ${GSL_LIBRARIES} m)
 
     # Builds example folder in place, make this optional
     add_subdirectory(examples "${CMAKE_CURRENT_SOURCE_DIR}/examples" EXCLUDE_FROM_ALL)
-
-    # Builds pkgconfig file for CCL
-    SET(PROJECT_DESCRIPTION "DESC Core Cosmology Library: cosmology routines with validated numerical accuracy")
-    SET(PKG_CONFIG_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib")
-    SET(PKG_CONFIG_INCLUDEDIR "${CMAKE_INSTALL_PREFIX}/include/")
-    SET(PKG_CONFIG_REQUIRES "gsl >= 2.1")
-    SET(PKG_CONFIG_REQUIRES_PRIVATE "fftw3")
-    SET(PKG_CONFIG_LIBS "-L${PKG_CONFIG_LIBDIR} -lccl -lm")
-    SET(PKG_CONFIG_CFLAGS "-I${PKG_CONFIG_INCLUDEDIR}")
-    CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/pkg-config.cmakein"
-                    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc" )
 
     # Installs the CCL library
     install(TARGETS ccl check_ccl
@@ -121,8 +109,7 @@ project(ccl VERSION 0.2.1)
             FILES_MATCHING PATTERN "*.h")
     install(FILES ${EXTRA_DIST} DESTINATION share/ccl)
     install(DIRECTORY ${EXTRA_DIST_DIRS} DESTINATION share/ccl)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ccl.pc DESTINATION lib/pkgconfig)
-
+    
     # Adds uninstall target
     if(NOT TARGET uninstall)
       configure_file(
@@ -133,5 +120,3 @@ project(ccl VERSION 0.2.1)
           COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
     endif()
 
-    # Optionally builds the python wrapper
-    add_subdirectory(pyccl EXCLUDE_FROM_ALL)
