@@ -1,5 +1,10 @@
 include(ExternalProject)
 
+# Old versions of cmake don't seem to play nice with the GIT_SHALLOW option
+if(${CMAKE_VERSION} VERSION_GREATER "3.10.0")
+  set(SHALLOW_GIT_CLONE GIT_SHALLOW 1)
+endif()
+
 set(AngpowTag v0.4.1)
 
 # Downloads and compiles Angpow
