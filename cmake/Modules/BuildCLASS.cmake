@@ -29,7 +29,7 @@ ExternalProject_Add(CLASS
         CONFIGURE_COMMAND     perl -pi -e "s/^CC /# CC /" Makefile &&
                               perl -pi -e "s/^OMPFLAG .*/${CLASS_OMPFLAG}/" Makefile &&
                               perl -pi -e "s/__CLASSDIR__.*/${CLASS_INSTALL_DIR}/" Makefile
-        BUILD_COMMAND         make CC=${CMAKE_C_COMPILER} libclass.a
+        BUILD_COMMAND         $(MAKE) CC=${CMAKE_C_COMPILER} libclass.a
         INSTALL_COMMAND       mkdir -p ${CMAKE_BINARY_DIR}/extern/lib &&
                               cp libclass.a ${CMAKE_BINARY_DIR}/extern/lib &&
                               cp -r include ${CMAKE_BINARY_DIR}/extern &&
